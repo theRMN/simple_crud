@@ -1,8 +1,8 @@
-from django.http import JsonResponse
 from .models import Project, Measurement
 from rest_framework.decorators import api_view
-from .serializers import ProjectSerializer
+from .serializers import ProjectSerializer, MeasurementSerializer
 from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED
+from rest_framework.response import Response
 
 # class ProjectViewSet(ModelViewSet):
 #     """ViewSet для проекта."""
@@ -23,7 +23,7 @@ def object_view(request):
         objects = Project.objects.all()
         serializer = ProjectSerializer(objects, many=True)
 
-        return JsonResponse(serializer.data, status=HTTP_200_OK, safe=False)
+        return Response(serializer.data, status=HTTP_200_OK)
 
     elif request.method == 'POST':
         serializer = ProjectSerializer(data=request.data)
@@ -31,4 +31,4 @@ def object_view(request):
         obj = Project.objects.create(**serializer.validated_data)
         context = ProjectSerializer(obj)
 
-        return JsonResponse(context.data, status=HTTP_201_CREATED)
+        return Response(context.data, status=HTTP_201_CREATED)
