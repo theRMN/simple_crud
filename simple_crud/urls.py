@@ -15,12 +15,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from measurements.views import object_view
-from django.views.decorators.csrf import csrf_exempt
+from measurements.views import ProjectApiView
 
 # TODO: настройте роутер и подключите `ProjectViewSet` и `MeasurementViewSet`
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('objects/', csrf_exempt(object_view), name='objects')
+    path('objects/', ProjectApiView.as_view(), name='objects')
 ]
