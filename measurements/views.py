@@ -1,9 +1,8 @@
-import json
-from django.views.decorators.csrf import csrf_exempt
-from rest_framework.viewsets import ModelViewSet
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
 from .models import Project, Measurement
-
+from rest_framework.decorators import api_view
+from .serializers import ProjectSerializer
+from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED
 
 # class ProjectViewSet(ModelViewSet):
 #     """ViewSet для проекта."""
@@ -14,20 +13,22 @@ from .models import Project, Measurement
 #     """ViewSet для измерения."""
 #     # TODO: добавьте конфигурацию для измерения
 
-@csrf_exempt
-def object_view(request):
-    if request.method not in ['GET', 'POST']:
-        return HttpResponse(status=405)
 
+METHODS = ['GET', 'POST']
+
+
+@api_view(http_method_names=METHODS)
+def object_view(request):
     if request.method == 'GET':
         objects = Project.objects.all()
-        data = [{'name': obj.name, 'latitude': obj.latitude, 'longitude': obj.longitude} for obj in objects]
+        serializer = ProjectSerializer(objects, many=True)
 
-        return JsonResponse(data, status=200, safe=False)
+        return JsonResponse(serializer.data, status=HTTP_200_OK, safe=False)
 
     elif request.method == 'POST':
-        data = json.loads(request.body)
-        obj = Project.objects.create(**data)
-        context = {'name': obj.name, 'latitude': obj.latitude, 'longitude': obj.longitude}
+        serializer = ProjectSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        obj = Project.objects.create(**serializer.validated_data)
+        context = ProjectSerializer(obj)
 
-        return JsonResponse(context, status=201)
+        return JsonResponse(context.data, status=HTTP_201_CREATED)
